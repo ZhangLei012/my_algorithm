@@ -86,8 +86,8 @@ int stoneGameV(vector<int>& stoneValue) {
                 int suml = sum[i][mid];
                 int sumr = sum[mid+1][j];
                 if(suml == sumr){
-                    dp[i][j] = max(dp[i][j], maxl[i][mid]);
-                    dp[i][j] = max(dp[i][j], maxr[mid+1][j]);  
+                    dp[i][j] = max(dp[i][j], maxl[i][mid]);//用上maxl
+                    dp[i][j] = max(dp[i][j], maxr[mid+1][j]);//用上maxr
                 }else{
                     if(mid > i){
                         //mid是第一个满足sum[i][mid] >= sum[mid+1][j]的位置，所以mid-1肯定不满足
