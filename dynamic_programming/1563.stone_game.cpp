@@ -43,6 +43,65 @@ public:
     }
 };
 
+//2.O(n^2)算法，在计算的过程中为下一次迭代考虑，计算出dp[i][k]+sum[i][k]的最大值，后面可以直接用。
+int stoneGameV(vector<int>& stoneValue) {
+    int sum[510][510];
+    int dp[510][510];//dp[i][j]表示从nums[i]到nums[j]所获得的最大分数
+    memset(dp, 0, sizeof(dp));
+    int maxl[510][510];//maxl[i][j]表示max{dp[i][k]+sum[i][k]}, k=i,i+1,...,j
+    memset(maxl, 0, sizeof(maxl));
+    int maxr[510][510];//maxr[i][j]表示max{dp[k][j]+sum[k][j]}, k=i,i+1,...,j
+    memset(maxr, 0, sizeof(maxr));
+    int n = stoneValue.size();
+    for(int i = 0; i < n; i++){
+        sum[i][i] = stoneValue[i];
+        maxl[i][i] = stoneValue[i];
+        maxr[i][i] = stoneValue[i];
+        for(int j = i + 1; j < n; j++){
+            sum[i][j] = sum[i][j-1] + stoneValue[j];
+            sum[j][i] = sum[i][j];
+        }
+    }
+    int g[510][510];//g[i][j]=mid表示mid是第一个sum[i][mid] >= sum[mid+1][j]的mid
+    memset(g, 0, sizeof(g));
+    for(int i = 0; i < n; i++){
+        g[i][i] = i;
+        for(int j = i+1; j < n; j++){
+            int mid = g[i][j-1];
+            while(mid < j && sum[i][mid] < sum[mid+1][j]){
+                mid++;
+            }
+            g[i][j] = mid;
+        }
+    }
+
+    for(int l = 2; l <= n; l++){
+        for(int i = 0; i + l - 1 < n; i++){
+            int j = i + l - 1;
+            int mid = g[i][j];//sum[i][mid] >= sum[mid+1][j]
+            if(mid == j){
+                dp[i][j] = max(dp[i][j], maxl[i][mid-1]);   
+            }else{
+                int suml = sum[i][mid];
+                int sumr = sum[mid+1][j];
+                if(suml == sumr){
+                    dp[i][j] = max(dp[i][j], maxl[i][mid]);
+                    dp[i][j] = max(dp[i][j], maxr[mid+1][j]);  
+                }else{
+                    if(mid > i){
+                        dp[i][j] = max(dp[i][j], maxl[i][mid-1]);
+                    }                    
+                    dp[i][j] = max(dp[i][j], maxr[mid+1][j]);
+                }
+            }             
+            int v = dp[i][j] + sum[i][j];
+            maxl[i][j] = max(maxl[i][j-1], v);
+            maxr[i][j] = max(maxr[i+1][j], v);      
+        }
+    }
+    return dp[0][n-1];
+}
+
 //2.错误解法，未通过[98,77,24,49,6,12,2,44,51,96]，结果因为330，二分在逻辑上应该是不正确的。
  int stoneGameV(vector<int>& stoneValue) {
         //dp[i][j]表示从nums[i]到nums[j]所获得的最大分数
