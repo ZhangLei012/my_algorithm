@@ -1,4 +1,3 @@
-#include<bits/stdc++.h>
 //992. K 个不同整数的子数组
 //给定一个正整数数组 A，如果 A 的某个子数组中不同整数的个数恰好为 K，则称 A 的这个连续、不一定不同的子数组为好子数组。
 //（例如，[1,2,3,1,2] 中有 3 个不同的整数：1，2，以及 3。）
@@ -119,5 +118,93 @@ public:
             }
         }
         return start_index == -1 ? "" :s.substr(start_index, min_len);
+    }
+};
+
+//2021.3.18 
+//209. 长度最小的子数组
+//给定一个含有 n 个正整数的数组和一个正整数 target 。
+//找出该数组中满足其和 ≥ target 的长度最小的 连续子数组 [numsl, numsl+1, ..., numsr-1, numsr] ，并返回其长度。如果不存在符合条件的子数组，返回 0 。
+class Window{
+private:
+    int sum;
+public:
+    Window():sum(0){
+    }
+    void add(int x){
+        sum += x;
+    }
+    void remove(int x){
+        sum -= x;
+    }
+    int inWindowSum(){
+        return sum;
+    }
+};
+class Solution {
+public:
+    int minSubArrayLen(int target, vector<int>& nums) {
+        int left = 0;
+        Window w;
+        int ret = nums.size() + 1;
+        for(int i = 0; i < nums.size(); i++){
+            w.add(nums[i]);
+            while(w.inWindowSum() >= target){
+                ret = min(ret, i - left + 1);
+                w.remove(nums[left]);
+                left++;
+            }
+        }
+        return ret == nums.size() + 1 ? 0 : ret;
+    }
+};
+
+
+//替换后的最长重复子串
+//给你一个仅由大写英文字母组成的字符串，你可以将任意位置上的字符替换成另外的字符，总共可最多替换 k 次。在执行上述操作后，找到包含重复字母的最长子串的长度。
+//注意：字符串长度 和 k 不会超过 104。
+class CharWindow{
+public:
+    CharWindow(char c):c_(c), c_count_(0), window_size_(0){};
+    void add(char x){
+        if(c_ == x){
+            c_count_++;
+        }
+        window_size_++;
+    }
+    void remove(char x){
+        if(c_ == x){
+            c_count_--;
+        }
+        window_size_--;
+    }
+    int getWindowSize(){
+        return window_size_;
+    }
+    int neededReplaceTimes(){
+        return window_size_ - c_count_;
+    }
+private:
+    char c_;
+    int c_count_;
+    int window_size_;
+};
+class Solution {
+public:
+    int characterReplacement(string s, int k) {
+        int ret = 0;
+        for(char c = 'A'; c <= 'Z'; c++){
+            CharWindow win(c);
+            int win_left = 0;
+            for(int i = 0; i < s.size(); i++){
+                win.add(s[i]);
+                while(win.neededReplaceTimes() > k){
+                    win.remove(s[win_left]);
+                    win_left++;
+                }
+                ret = max(ret, win.getWindowSize());
+            }
+        }
+        return ret;
     }
 };
