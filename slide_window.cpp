@@ -163,6 +163,7 @@ public:
 //替换后的最长重复子串
 //给你一个仅由大写英文字母组成的字符串，你可以将任意位置上的字符替换成另外的字符，总共可最多替换 k 次。在执行上述操作后，找到包含重复字母的最长子串的长度。
 //注意：字符串长度 和 k 不会超过 104。
+//法1：每次只考虑一种字符
 class CharWindow{
 public:
     CharWindow(char c):c_(c), c_count_(0), window_size_(0){};
@@ -204,6 +205,55 @@ public:
                 }
                 ret = max(ret, win.getWindowSize());
             }
+        }
+        return ret;
+    }
+};
+
+//法2：同时考虑多种字符
+class CharWindow{
+public:
+    CharWindow():max_count(0), window_size_(0){
+        memset(char_count, 0, sizeof(char_count));
+    };
+    void add(char x){
+        char_count[x]++;
+        window_size_++;
+        if(char_count[x] > max_count){
+            max_count = char_count[x];
+        }
+    }
+    void remove(char x){
+        char_count[x]--;
+        window_size_--;
+        if(char_count[x] == max_count - 1){
+            max_count = *max_element(char_count, char_count + 256);
+        }
+    }
+    int getWindowSize(){
+        return window_size_;
+    }
+    int neededReplaceTimes(){
+        return window_size_ - max_count;
+    }
+private:
+    int max_count;
+    int char_count[256];
+    int window_size_;
+};
+class Solution {
+public:
+    int characterReplacement(string s, int k) {
+        int ret = 0;
+        CharWindow win;
+        int left = 0;
+        for(int i = 0; i < s.size(); i++){
+            win.add(s[i]);
+            while(win.neededReplaceTimes() > k){
+                win.remove(s[left]);
+                left++;
+            }
+            ret = max(ret, win.getWindowSize());
         }
         return ret;
     }
